@@ -6,10 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import io.camunda.zeebe.spring.client.EnableZeebeClient;
-
 @SpringBootApplication
-@EnableZeebeClient
 public class ConnectorApplication {
 
 	public static void main(String[] args) {

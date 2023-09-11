@@ -2,38 +2,45 @@ package com.example.connector;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-
-import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.ActivatedJob;
-import io.camunda.zeebe.client.api.worker.JobClient;
-import io.camunda.zeebe.spring.client.annotation.ZeebeWorker;
 
 @SpringBootApplication
 public class TeamConnectorService {
-	@Autowired
-	ZeebeClient zeebeclient;
+	
+//	@Autowired
+//	ZeebeClient zeebeclient;
+//
+//	@ZeebeWorker(name = "TeamConnector", type = "TeamConnector")
+//	public void ProductionCompleted(final JobClient client, final ActivatedJob job) throws Exception {
+	
+	
 	RestTemplate restTemplate = new RestTemplate();
-
-	@ZeebeWorker(name = "TeamConnector", type = "TeamConnector")
-	public void ProductionCompleted(final JobClient client, final ActivatedJob job) throws Exception {
-		Map<String, Object> getvar = job.getVariablesAsMap();
-		String senderEmailId = (String) getvar.get("senderEmailId");
-		String receieverEmailId = (String) getvar.get("receieverEmailId");
-		String accessToken = (String) getvar.get("accessToken");
-		Map bodys = (Map) getvar.get("body");
-		String Message = (String) bodys.get("content");
+	
+	public void ProductionCompleted() {
+//		Map<String, Object> getvar = job.getVariablesAsMap();
+//		String senderEmailId = (String) getvar.get("senderEmailId");
+//		String receieverEmailId = (String) getvar.get("receieverEmailId");
+//		String accessToken = (String) getvar.get("accessToken");
+//		Map bodys = (Map) getvar.get("body");
+//		String Message = (String) bodys.get("content");
+		
+		
+		//
+		String senderEmailId = "";
+		String receieverEmailId = "";
+		String accessToken = "";
+		String bodys = "";
+		String Message = "";
+		
+		
+		
+		
+		
 
 		String urll = "https://graph.microsoft.com/v1.0/chats";
 
@@ -80,7 +87,7 @@ public class TeamConnectorService {
 				+ "    }\r\n" + "}";
 		HttpEntity<String> requestEntityss = new HttpEntity<>(messageDto, headers);
 		ResponseEntity<Map> responsess = restTemplate.exchange(sendUrl, HttpMethod.POST, requestEntityss, Map.class);
-		zeebeclient.newCompleteCommand(job.getKey()).variables(" ").send().join();
+//		zeebeclient.newCompleteCommand(job.getKey()).variables(" ").send().join();
 	}
 
 }

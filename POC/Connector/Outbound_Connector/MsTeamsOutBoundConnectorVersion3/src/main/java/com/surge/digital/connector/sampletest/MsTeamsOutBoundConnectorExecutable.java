@@ -23,50 +23,36 @@ public class MsTeamsOutBoundConnectorExecutable implements OutboundConnectorFunc
       LoggerFactory.getLogger(MsTeamsOutBoundConnectorExecutable.class);
 
   RestTemplate restTemplate = new RestTemplate();
+  JSONParser parser = new JSONParser();
 
   @Override
   public Object execute(final OutboundConnectorContext context) throws Exception {
-    String url = "http://localhost:8080/startFlow";
 
-    String str = context.getVariables();
+    String variables = context.getVariables();
 
-    JSONParser parser = new JSONParser();
-    JSONObject json = (JSONObject) parser.parse(str);
-
+    JSONObject json = (JSONObject) parser.parse(variables);
+    String jso = json.toString();
     String senderEmailId = (String) json.get("senderEmailId");
-
+    String body = (String) json.get("body");
     String receieverEmailId = (String) json.get("receieverEmailId");
-
-    String content = (String) json.get("body");
-
     String accessToken = (String) json.get("AccessToken");
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("Authorization", "Bearer " + accessToken);
-    headers.set("Content-Type", "application/json");
+    HttpHeaders header = new HttpHeaders();
+    header.setContentType(MediaType.APPLICATION_JSON);
+    // header.set("json", jso);
+    header.set("senderEmailId", senderEmailId);
+    header.set("receiverEmailId", receieverEmailId);
+    header.set("accessToken", accessToken);
+    header.set("body", body);
 
-    String messageDto =
-        "{\r\n"
-            + "    \"senderEmailId\": \""
-            + senderEmailId
-            + "\",\r\n"
-            + "    \"receieverEmailId\": \""
-            + receieverEmailId
-            + "\",\r\n"
-            + "    \"accessToken\": \""
-            + accessToken
-            + "\",\r\n"
-            + "    \"body\": {\r\n"
-            + "        \"content\": \""
-            + content
-            + "\"\r\n"
-            // " \"content\": \"Task Completed completed\" \r\n"
-            + "    }\r\n"
-            + "}";
-    HttpEntity<String> requestEntitys = new HttpEntity<>(messageDto, headers);
-    ResponseEntity<String> responses =
-        restTemplate.exchange(url, HttpMethod.POST, requestEntitys, String.class);
+    String url = "http://localhost:8080/demo";
+    HttpEntity<String> reqEntity = new HttpEntity<>(header);
+    ResponseEntity<String> reponseEntity =
+        restTemplate.exchange(url, HttpMethod.GET, reqEntity, String.class);
+
+    String str = reponseEntity.getBody();
+    //
+    System.out.println("str  response---------" + str);
 
     LOGGER.info("Executing ReportUrlApi connector with context: " + context);
     var connectorRequest = context.getVariables();

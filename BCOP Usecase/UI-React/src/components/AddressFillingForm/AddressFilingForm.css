@@ -1,0 +1,103 @@
+.address-form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #0a0909;
+  border-radius: 15px;
+  background-color: #f9f9f9;
+  height: 80vh;
+  display: flex;
+  font-size: medium;
+}
+.form-wrapper {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.form-control {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  margin-bottom: 0;
+  height: 50px;
+  border: 1px solid black;
+    border-radius: 0.25rem;
+}
+.Addform{
+  /* background-color: #e6e5e5; */
+  height: 110vh;
+
+  background-image: url("../../assets/images/skycity.jpg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  box-shadow: 5px 8px 7px rgb(0, 0, 0);
+}
+label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 25px;
+}
+.selected-radio {
+  background-color: #007bff; /* Change this to your desired color */
+  color: white;
+}
+
+.radio-button-group {
+  display: flex;
+  align-items: center;
+}
+
+.radio-button-space {
+  margin: 0 10px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -16px;
+  margin-left: -15px;
+}
+
+.checkbox-lg .form-check-input{ top: .8rem; scale: 1.4; margin-right: 0.7rem; }.checkbox-lg .form-check-label { padding-top: 13px; }
+.star{
+  color: rgba(180, 51, 51, 0.904);
+
+}
+
+.checkbox{
+  font-size:20px
+}
+/* AddressFilingForm.css */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.3);
+  border-top: 4px solid #007bff; 
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

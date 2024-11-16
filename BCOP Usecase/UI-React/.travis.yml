@@ -1,0 +1,10 @@
+sudo: required
+services:
+    - docker
+    
+before_install:
+    - docker build -t robinat13/onlinebankingfe -f Dockerfile.dev .
+    
+script:
+  - docker run -e CI=true robinat13/onlinebankingfe npm run test
+  

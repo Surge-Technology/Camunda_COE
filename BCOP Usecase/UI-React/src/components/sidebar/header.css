@@ -1,0 +1,22 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #333; /* Set your desired background color */
+    color: white; /* Set your desired text color */
+  }
+  
+  .right-corner {
+    display: flex;
+    justify-content: flex-end; /* This pushes the content to the right */
+    height: 100%; /* Optional: Ensure the container takes full height */
+    padding: 0 80px; /* Optional: Add some padding for spacing */
+  }
+  
+  .right-corner span {
+    font-weight: bold; 
+  }
+  
+  
+  

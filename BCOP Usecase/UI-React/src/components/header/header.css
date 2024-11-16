@@ -1,0 +1,10 @@
+.header {
+  background-image: url("../../assets/images/header-background.jpg");
+  /* background-size: 100%; */
+  color: rgb(255, 255, 255);
+  background-repeat: no-repeat;
+  background-size: cover;
+  /* padding: 0px; */
+  font-family: cursive;
+  width: 100%;
+}

@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:color="http://www.omg.org/spec/BPMN/non-normative/color/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_0zt7x42" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.17.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.1.0" camunda:diagramRelationId="11f4c54a-b2bc-4f14-bbb9-7d90a34fde7a">
+  <bpmn:process id="Banking_Customer_Onboarding_Process" name="Banking_Customer_Onboarding_Process" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_0uycjmt" />
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:outgoing>Flow_0ff3x1n</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0ff3x1n" sourceRef="StartEvent_1" targetRef="Email_Verification" />
+    <bpmn:callActivity id="Email_Verification" name="Email Verification">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="emailVerification" propagateAllChildVariables="true" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0ff3x1n</bpmn:incoming>
+      <bpmn:outgoing>Flow_0qxginu</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="Gateway_0akppah" name="Credit Score Evaluation&#10;">
+      <bpmn:incoming>Flow_0foba9i</bpmn:incoming>
+      <bpmn:outgoing>Flow_0qawqbh</bpmn:outgoing>
+      <bpmn:outgoing>Flow_13tyu0b</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1kekcwa</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0qawqbh" name="Credit Score - Medium" sourceRef="Gateway_0akppah" targetRef="DecideOnApplication">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=risk="medium"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="DecideOnApplication" name="Approver Level One">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="demo" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;PopUp&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0qawqbh</bpmn:incoming>
+      <bpmn:incoming>Flow_0xdvo4q</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tpp024</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0wyvw6w" sourceRef="Event_06tsyrx" targetRef="AccelerateDecisionMaking" />
+    <bpmn:userTask id="AccelerateDecisionMaking" name="Approver Level Two">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="demo" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;ManagerApproverForm&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0wyvw6w</bpmn:incoming>
+      <bpmn:outgoing>Flow_0uqujgp</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_0deql6q" name="Approval Decision&#10;">
+      <bpmn:incoming>Flow_0tpp024</bpmn:incoming>
+      <bpmn:incoming>Flow_0uqujgp</bpmn:incoming>
+      <bpmn:outgoing>Flow_1fescaa</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0j3d3lg</bpmn:outgoing>
+      <bpmn:outgoing>Flow_05ew9b0</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0tpp024" sourceRef="DecideOnApplication" targetRef="Gateway_0deql6q" />
+    <bpmn:sequenceFlow id="Flow_1fescaa" name="Approve" sourceRef="Gateway_0deql6q" targetRef="Activity_045cvaa">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approver="approved"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0uqujgp" sourceRef="AccelerateDecisionMaking" targetRef="Gateway_0deql6q" />
+    <bpmn:sequenceFlow id="Flow_13tyu0b" name="Credit Score - Low" sourceRef="Gateway_0akppah" targetRef="Activity_1w2wfwq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=risk="low"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0j3d3lg" name="Reject" sourceRef="Gateway_0deql6q" targetRef="Activity_125vvxv">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approver="rejected"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0uf3q65" sourceRef="Activity_125vvxv" targetRef="sendRejection" />
+    <bpmn:sequenceFlow id="Flow_1e6wfcu" sourceRef="Activity_045cvaa" targetRef="SendConfirmation" />
+    <bpmn:endEvent id="Event_0k0fvzc" name="Application Accepted Process End">
+      <bpmn:incoming>Flow_1xntj3o</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1xntj3o" sourceRef="SendConfirmation" targetRef="Event_0k0fvzc" />
+    <bpmn:endEvent id="Event_16yiomj" name="Application Rejected Process End">
+      <bpmn:incoming>Flow_1vch1m1</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1vch1m1" sourceRef="sendRejection" targetRef="Event_16yiomj" />
+    <bpmn:sendTask id="sendRejection" name="Send Notification on Application Rejection">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="Send rejection" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0uf3q65</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vch1m1</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="Activity_045cvaa" name="Add Approved Application to CRM">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="Add Application into CRM" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1fescaa</bpmn:incoming>
+      <bpmn:incoming>Flow_1qnir6l</bpmn:incoming>
+      <bpmn:outgoing>Flow_1e6wfcu</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sendTask id="SendConfirmation" name="Send Confirmation on Application Acceptance">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="Send Confirmation" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1e6wfcu</bpmn:incoming>
+      <bpmn:outgoing>Flow_1xntj3o</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:boundaryEvent id="Event_0d8pox6" cancelActivity="false" attachedToRef="DecideOnApplication">
+      <bpmn:outgoing>Flow_06cnkey</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1t2qebl">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:boundaryEvent id="Event_06tsyrx" attachedToRef="DecideOnApplication">
+      <bpmn:outgoing>Flow_0wyvw6w</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1h7b1my">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT45S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0foba9i" sourceRef="Credit_Score_Evaluation_Decision" targetRef="Gateway_0akppah" />
+    <bpmn:businessRuleTask id="Credit_Score_Evaluation_Decision" name="Credit Score Evaluation Decision">
+      <bpmn:extensionElements>
+        <zeebe:calledDecision decisionId="Decision_0tqws81" resultVariable="risk" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1tdzjgj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0foba9i</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:sequenceFlow id="Flow_05ew9b0" name="Request Clarification" sourceRef="Gateway_0deql6q" targetRef="Activity_039djmx">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=approver="needClarification"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_039djmx" name="Send Clarification">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="sendClarification" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_05ew9b0</bpmn:incoming>
+      <bpmn:outgoing>Flow_10ak0u0</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_10ak0u0" sourceRef="Activity_039djmx" targetRef="Customer_Reply" />
+    <bpmn:serviceTask id="Activity_125vvxv" name="Add Rejected Application to CRM">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="addRejectedApplication to CRM" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0j3d3lg</bpmn:incoming>
+      <bpmn:incoming>Flow_14g34cj</bpmn:incoming>
+      <bpmn:outgoing>Flow_0uf3q65</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1kdwsk3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_092fn27" name="End">
+      <bpmn:incoming>Flow_12yqki3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_12yqki3" sourceRef="Activity_06x02la" targetRef="Event_092fn27" />
+    <bpmn:sendTask id="Activity_06x02la" name="Send Re-Engagement Invitations">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="Send Re-Engagement Invitations" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1kdwsk3</bpmn:incoming>
+      <bpmn:outgoing>Flow_12yqki3</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:sequenceFlow id="Flow_1kdwsk3" sourceRef="Activity_125vvxv" targetRef="Activity_06x02la" />
+    <bpmn:sequenceFlow id="Flow_0qxginu" sourceRef="Email_Verification" targetRef="Address_Verification" />
+    <bpmn:sequenceFlow id="Flow_1kekcwa" name="Credit Score  - High" sourceRef="Gateway_0akppah" targetRef="Activity_0ay2kz7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=risk="high"</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1qnir6l" sourceRef="Activity_0ay2kz7" targetRef="Activity_045cvaa" />
+    <bpmn:userTask id="Activity_0ay2kz7" name="Approval Confirmation Notification">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;success&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+        <zeebe:assignmentDefinition assignee="demo" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1kekcwa</bpmn:incoming>
+      <bpmn:outgoing>Flow_1qnir6l</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Activity_1w2wfwq" name="Approval Rejection Notification">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;registrationReject&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+        <zeebe:assignmentDefinition assignee="demo" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_13tyu0b</bpmn:incoming>
+      <bpmn:outgoing>Flow_14g34cj</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_14g34cj" sourceRef="Activity_1w2wfwq" targetRef="Activity_125vvxv" />
+    <bpmn:sequenceFlow id="Flow_0xdvo4q" sourceRef="Customer_Reply" targetRef="DecideOnApplication" />
+    <bpmn:userTask id="Customer_Reply" name="Customer Reply">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="demo" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_10ak0u0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0xdvo4q</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Address_Verification" name="Address Form">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="demo" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;addressFillForm&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0qxginu</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zmi9ib</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1tdzjgj" sourceRef="Personal_Details" targetRef="Credit_Score_Evaluation_Decision" />
+    <bpmn:userTask id="Personal_Details" name="Personal Detail Form">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="demo" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;personalDetails&#34;" target="localTaskName" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0zmi9ib</bpmn:incoming>
+      <bpmn:outgoing>Flow_1tdzjgj</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0zmi9ib" sourceRef="Address_Verification" targetRef="Personal_Details" />
+    <bpmn:sequenceFlow id="Flow_06cnkey" sourceRef="Event_0d8pox6" targetRef="Activity_09k8kj5" />
+    <bpmn:serviceTask id="Activity_09k8kj5" name="Connector" zeebe:modelerTemplate="io.camunda:connector-custom2:1" zeebe:modelerTemplateVersion="1" zeebe:modelerTemplateIcon="data:image/png;base64,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">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="io.camunda:connector-custom:1" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;sts178@surgetechinc.in&#34;" target="senderEmailId" />
+          <zeebe:input source="=&#34;sts177@surgetechinc.in&#34;" target="receieverEmailId" />
+          <zeebe:input source="=&#34;Customer Onboarding Process Pending For Your Approval&#34;" target="body" />
+          <zeebe:input source="=&#34;eyJ0eXAiOiJKV1QiLCJub25jZSI6IldleW1wamhRX01mMzVQQ3ljaUFnWjFYWFF6SGRyNld4dWxHTjdSUk5oX1UiLCJhbGciOiJSUzI1NiIsIng1dCI6IjNQYUs0RWZ5Qk5RdTNDdGpZc2EzWW1oUTVFMCIsImtpZCI6IjNQYUs0RWZ5Qk5RdTNDdGpZc2EzWW1oUTVFMCJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9hNGM3NDI3MC0wOWJhLTRmYWMtYjJiNi0zOWRhZDE2YTE1YWUvIiwiaWF0IjoxNzMwNzE5MTAyLCJuYmYiOjE3MzA3MTkxMDIsImV4cCI6MTczMDgwNTgwMiwiYWNjdCI6MCwiYWNyIjoiMSIsImFpbyI6IkFUUUF5LzhZQUFBQStPT2NkRlkxc1NQbVZ0ejl5N08zSjFuaW9rbFZUdGNTRzBKdHlQQWt0Q2FMNXFLNVNzU05RWXpZQlh5QmZkeEIiLCJhbXIiOlsicHdkIiwicnNhIl0sImFwcF9kaXNwbGF5bmFtZSI6IkdyYXBoIEV4cGxvcmVyIiwiYXBwaWQiOiJkZThiYzhiNS1kOWY5LTQ4YjEtYThhZC1iNzQ4ZGE3MjUwNjQiLCJhcHBpZGFjciI6IjAiLCJkZXZpY2VpZCI6IjY5ZDRmZjg5LTcxMjItNDE5MS1iMjY2LTJlY2JjNWYwZTZjMCIsImZhbWlseV9uYW1lIjoiTXVydWdhZGFzcyIsImdpdmVuX25hbWUiOiJCYWxhbWFuY2hhcmkiLCJpZHR5cCI6InVzZXIiLCJpcGFkZHIiOiIxNC45Ny4yMjQuMTU4IiwibmFtZSI6IkJhbGFtYW5jaGFyaSBNdXJ1Z2FkYXNzIiwib2lkIjoiYTI0MzIxY2EtMWMxMC00NWEyLTk0ZTEtOTc5ZDVhZTk0YmIxIiwib25wcmVtX3NpZCI6IlMtMS01LTIxLTE4MDEwNjUwNjMtODY5Mzc3ODQ5LTEzNjk3NjUyNDQtMTE1OCIsInBsYXRmIjoiMyIsInB1aWQiOiIxMDAzMjAwMjE3NkQ0NEI4IiwicmgiOiIxLkFVa0FjRUxIcExvSnJFLXl0am5hMFdvVnJnTUFBQUFBQUFBQXdBQUFBQUFBQUFBb0FUaEpBQS4iLCJzY3AiOiJDaGF0LkNyZWF0ZSBDaGF0LlJlYWQgQ2hhdC5SZWFkQmFzaWMgQ2hhdC5SZWFkV3JpdGUgQ2hhdE1lc3NhZ2UuUmVhZCBDaGF0TWVzc2FnZS5TZW5kIG9wZW5pZCBwcm9maWxlIFVzZXIuUmVhZCBVc2VyLlJlYWRCYXNpYy5BbGwgVXNlci5SZWFkV3JpdGUgVXNlckFjdGl2aXR5LlJlYWRXcml0ZS5DcmVhdGVkQnlBcHAgZW1haWwiLCJzaWduaW5fc3RhdGUiOlsia21zaSJdLCJzdWIiOiJDSlYxaVdkY041RDJZYnI2VTA2b29za1Jtak5XemhxQ0VFUkRlbWgzYkFVIiwidGVuYW50X3JlZ2lvbl9zY29wZSI6IkFTIiwidGlkIjoiYTRjNzQyNzAtMDliYS00ZmFjLWIyYjYtMzlkYWQxNmExNWFlIiwidW5pcXVlX25hbWUiOiJTVFMxNzhAc3VyZ2V0ZWNoaW5jLmluIiwidXBuIjoiU1RTMTc4QHN1cmdldGVjaGluYy5pbiIsInV0aSI6IlpGNUN4cUxFcjBlR1NZU3RySnRNQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdLCJ4bXNfY2MiOlsiQ1AxIl0sInhtc19pZHJlbCI6IjEgMiIsInhtc19zc20iOiIxIiwieG1zX3N0Ijp7InN1YiI6InRPWERhOEZmZ19EeEtuREhZLXlxb0hwLWZoTVBlTFVWcDh0MUQ5S1YyXzAifSwieG1zX3RjZHQiOjE1OTEzMzEwMDh9.X5hbHxRHANNZL3_GMsEI4IkDybna3uZ2IkbRIHxO9wxxHfVLmHqyIaHy0BsL9YL4fUQSI9rXQUauvROIiqaCs-U9bNP3M5O-Q7-fF4oYhn0lV2ojugx8djtleKTsrn_dceCRb_iqAXl6mxrbakeh-vRlSdOcKFeNWoYaYZJXen1WgXQwn7MBKWVtrHNIl4eWQE2NAi8yPRzxQFtjH27QoSw1UODmlk3iZPSvPI8SAMbA8dd4HYC81zUTJfuuQhAsDspj-mV-qtUJDT3vULAUWvLJ6oKRlKwrJonwZ8RX5LppiYQlZa8XU0hGNNKLTX_ncuhMxVt6H3Uw3qAdEnjsZQ&#34;" target="AccessToken" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_06cnkey</bpmn:incoming>
+      <bpmn:outgoing>Flow_1iutx6p</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_0b1jfy8" name="End">
+      <bpmn:incoming>Flow_1iutx6p</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1iutx6p" sourceRef="Activity_09k8kj5" targetRef="Event_0b1jfy8" />
+    <bpmn:textAnnotation id="TextAnnotation_1qvd76l">
+      <bpmn:text>Validate user's email by verification code</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0mxrkfn" sourceRef="Email_Verification" targetRef="TextAnnotation_1qvd76l" />
+    <bpmn:textAnnotation id="TextAnnotation_14xxgww">
+      <bpmn:text>Notify Remainder: Communication Channel can be SLACK, MS-TEAMS Using Surge ACCELERATOR</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_06amu74" sourceRef="Event_0d8pox6" targetRef="TextAnnotation_14xxgww" />
+    <bpmn:textAnnotation id="TextAnnotation_0avoydy">
+      <bpmn:text>If Approver  does not respond within the specified time, the task will be escalated to the next approver in line for review.</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_07hd03l" sourceRef="Event_06tsyrx" targetRef="TextAnnotation_0avoydy" />
+    <bpmn:textAnnotation id="TextAnnotation_0sv216b">
+      <bpmn:text>Based out of credit score, Business Rule Engine (DMN) decides the process flow</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0htq6oj" sourceRef="Credit_Score_Evaluation_Decision" targetRef="TextAnnotation_0sv216b" />
+    <bpmn:textAnnotation id="TextAnnotation_0r8i3ql">
+      <bpmn:text>Accelerate Decision Making</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_1nospbi" sourceRef="AccelerateDecisionMaking" targetRef="TextAnnotation_0r8i3ql" />
+    <bpmn:textAnnotation id="TextAnnotation_0gojgpn">
+      <bpmn:text>Approver will be notified on receiving clarification</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_109epz7" sourceRef="Customer_Reply" targetRef="TextAnnotation_0gojgpn" />
+  </bpmn:process>
+  <bpmn:error id="Error_0aut8c6" name="Error_2i3usmb" />
+  <bpmn:error id="Error_1y75noo" name="Error_2479o6s" errorCode="addressError" />
+  <bpmn:message id="Message_1e68957" name="Message_1e68957">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=12345" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Banking_Customer_Onboarding_Process">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="152" y="362" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="160" y="405" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_036h3nn_di" bpmnElement="Email_Verification" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="260" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0akppah_di" bpmnElement="Gateway_0akppah" isMarkerVisible="true" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1065" y="352" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="999" y="340" width="62" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11ncyqi_di" bpmnElement="DecideOnApplication" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
+        <dc:Bounds x="1370" y="460" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_05w0ypa_di" bpmnElement="AccelerateDecisionMaking" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1530" y="290" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0deql6q_di" bpmnElement="Gateway_0deql6q" isMarkerVisible="true" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1685" y="475" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1606" y="466" width="88" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0k0fvzc_di" bpmnElement="Event_0k0fvzc" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="2032" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2025" y="175" width="89" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_16yiomj_di" bpmnElement="Event_16yiomj" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="2052" y="802" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2046" y="845" width="87" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ue15mu_di" bpmnElement="sendRejection" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1910" y="780" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_16zjstp_di" bpmnElement="Activity_045cvaa" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="1750" y="110" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0zvitnh_di" bpmnElement="SendConfirmation" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="1890" y="110" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_09syzpy_di" bpmnElement="Credit_Score_Evaluation_Decision" bioc:stroke="#5b176d" bioc:fill="#e1bee7" color:background-color="#e1bee7" color:border-color="#5b176d">
+        <dc:Bounds x="840" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1p74rmz_di" bpmnElement="Activity_039djmx" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="1880" y="570" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mz4qut_di" bpmnElement="Activity_125vvxv" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1750" y="780" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_092fn27_di" bpmnElement="Event_092fn27">
+        <dc:Bounds x="2032" y="932" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2040" y="975" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0uu8z9z_di" bpmnElement="Activity_06x02la" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="1880" y="910" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jaka89_di" bpmnElement="Activity_0ay2kz7" bioc:stroke="#205022" bioc:fill="#c8e6c9" color:background-color="#c8e6c9" color:border-color="#205022">
+        <dc:Bounds x="1300" y="90" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0tw9naj_di" bpmnElement="Activity_1w2wfwq" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="1300" y="800" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0xr264c_di" bpmnElement="Customer_Reply" bioc:stroke="#6b3c00" bioc:fill="#ffe0b2" color:background-color="#ffe0b2" color:border-color="#6b3c00">
+        <dc:Bounds x="1540" y="570" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1x7appl_di" bpmnElement="Address_Verification" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="460" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mxzjdk_di" bpmnElement="Personal_Details" bioc:stroke="#831311" bioc:fill="#ffcdd2" color:background-color="#ffcdd2" color:border-color="#831311">
+        <dc:Bounds x="640" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1hvlydc_di" bpmnElement="Activity_09k8kj5" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="1340" y="620" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0b1jfy8_di" bpmnElement="Event_0b1jfy8" bioc:stroke="#0d4372" bioc:fill="#bbdefb" color:background-color="#bbdefb" color:border-color="#0d4372">
+        <dc:Bounds x="1372" y="722" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1380" y="765" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1qvd76l_di" bpmnElement="TextAnnotation_1qvd76l">
+        <dc:Bounds x="180" y="214" width="170" height="40" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_14xxgww_di" bpmnElement="TextAnnotation_14xxgww">
+        <dc:Bounds x="1115" y="610" width="230" height="55" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0avoydy_di" bpmnElement="TextAnnotation_0avoydy">
+        <dc:Bounds x="1270" y="214" width="160" height="90" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0sv216b_di" bpmnElement="TextAnnotation_0sv216b">
+        <dc:Bounds x="870" y="221" width="200" height="55" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0r8i3ql_di" bpmnElement="TextAnnotation_0r8i3ql">
+        <dc:Bounds x="1580" y="209" width="100" height="55" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0gojgpn_di" bpmnElement="TextAnnotation_0gojgpn">
+        <dc:Bounds x="1560" y="685" width="100" height="69" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_10zxcb0_di" bpmnElement="Event_06tsyrx">
+        <dc:Bounds x="1422" y="442" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1hs5px7_di" bpmnElement="Event_0d8pox6">
+        <dc:Bounds x="1372" y="522" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0ff3x1n_di" bpmnElement="Flow_0ff3x1n">
+        <di:waypoint x="188" y="380" />
+        <di:waypoint x="260" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qawqbh_di" bpmnElement="Flow_0qawqbh">
+        <di:waypoint x="1115" y="377" />
+        <di:waypoint x="1280" y="377" />
+        <di:waypoint x="1280" y="500" />
+        <di:waypoint x="1370" y="500" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1138" y="346" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wyvw6w_di" bpmnElement="Flow_0wyvw6w">
+        <di:waypoint x="1440" y="442" />
+        <di:waypoint x="1440" y="330" />
+        <di:waypoint x="1530" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tpp024_di" bpmnElement="Flow_0tpp024">
+        <di:waypoint x="1470" y="500" />
+        <di:waypoint x="1685" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1fescaa_di" bpmnElement="Flow_1fescaa">
+        <di:waypoint x="1710" y="475" />
+        <di:waypoint x="1710" y="173" />
+        <di:waypoint x="1750" y="173" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1721" y="321" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uqujgp_di" bpmnElement="Flow_0uqujgp">
+        <di:waypoint x="1580" y="370" />
+        <di:waypoint x="1580" y="500" />
+        <di:waypoint x="1685" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13tyu0b_di" bpmnElement="Flow_13tyu0b">
+        <di:waypoint x="1090" y="402" />
+        <di:waypoint x="1090" y="840" />
+        <di:waypoint x="1300" y="840" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="999" y="513" width="62" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0j3d3lg_di" bpmnElement="Flow_0j3d3lg">
+        <di:waypoint x="1710" y="525" />
+        <di:waypoint x="1710" y="800" />
+        <di:waypoint x="1750" y="800" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1725" y="720" width="32" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uf3q65_di" bpmnElement="Flow_0uf3q65">
+        <di:waypoint x="1850" y="820" />
+        <di:waypoint x="1910" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1e6wfcu_di" bpmnElement="Flow_1e6wfcu">
+        <di:waypoint x="1850" y="150" />
+        <di:waypoint x="1890" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xntj3o_di" bpmnElement="Flow_1xntj3o">
+        <di:waypoint x="1990" y="150" />
+        <di:waypoint x="2032" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vch1m1_di" bpmnElement="Flow_1vch1m1">
+        <di:waypoint x="2010" y="820" />
+        <di:waypoint x="2052" y="820" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0foba9i_di" bpmnElement="Flow_0foba9i">
+        <di:waypoint x="940" y="380" />
+        <di:waypoint x="1068" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05ew9b0_di" bpmnElement="Flow_05ew9b0">
+        <di:waypoint x="1735" y="500" />
+        <di:waypoint x="2050" y="500" />
+        <di:waypoint x="2050" y="610" />
+        <di:waypoint x="1980" y="610" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1864" y="466" width="58" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10ak0u0_di" bpmnElement="Flow_10ak0u0">
+        <di:waypoint x="1880" y="610" />
+        <di:waypoint x="1640" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12yqki3_di" bpmnElement="Flow_12yqki3">
+        <di:waypoint x="1980" y="950" />
+        <di:waypoint x="2032" y="950" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kdwsk3_di" bpmnElement="Flow_1kdwsk3">
+        <di:waypoint x="1800" y="860" />
+        <di:waypoint x="1800" y="950" />
+        <di:waypoint x="1880" y="950" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qxginu_di" bpmnElement="Flow_0qxginu">
+        <di:waypoint x="360" y="380" />
+        <di:waypoint x="460" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kekcwa_di" bpmnElement="Flow_1kekcwa">
+        <di:waypoint x="1090" y="352" />
+        <di:waypoint x="1090" y="130" />
+        <di:waypoint x="1300" y="130" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1147" y="86" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qnir6l_di" bpmnElement="Flow_1qnir6l">
+        <di:waypoint x="1400" y="130" />
+        <di:waypoint x="1750" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14g34cj_di" bpmnElement="Flow_14g34cj">
+        <di:waypoint x="1400" y="840" />
+        <di:waypoint x="1750" y="840" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0xdvo4q_di" bpmnElement="Flow_0xdvo4q">
+        <di:waypoint x="1540" y="610" />
+        <di:waypoint x="1440" y="610" />
+        <di:waypoint x="1440" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1tdzjgj_di" bpmnElement="Flow_1tdzjgj">
+        <di:waypoint x="740" y="380" />
+        <di:waypoint x="840" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zmi9ib_di" bpmnElement="Flow_0zmi9ib">
+        <di:waypoint x="560" y="380" />
+        <di:waypoint x="640" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06cnkey_di" bpmnElement="Flow_06cnkey">
+        <di:waypoint x="1390" y="558" />
+        <di:waypoint x="1390" y="620" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1iutx6p_di" bpmnElement="Flow_1iutx6p">
+        <di:waypoint x="1390" y="700" />
+        <di:waypoint x="1390" y="722" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0mxrkfn_di" bpmnElement="Association_0mxrkfn">
+        <di:waypoint x="288" y="340" />
+        <di:waypoint x="239" y="254" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_06amu74_di" bpmnElement="Association_06amu74">
+        <di:waypoint x="1375" y="550" />
+        <di:waypoint x="1230" y="550" />
+        <di:waypoint x="1220" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_07hd03l_di" bpmnElement="Association_07hd03l">
+        <di:waypoint x="1431" y="445" />
+        <di:waypoint x="1390" y="380" />
+        <di:waypoint x="1346" y="304" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0htq6oj_di" bpmnElement="Association_0htq6oj">
+        <di:waypoint x="890" y="340" />
+        <di:waypoint x="900" y="280" />
+        <di:waypoint x="900" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1nospbi_di" bpmnElement="Association_1nospbi">
+        <di:waypoint x="1599" y="290" />
+        <di:waypoint x="1611" y="264" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_109epz7_di" bpmnElement="Association_109epz7">
+        <di:waypoint x="1599" y="650" />
+        <di:waypoint x="1607" y="685" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

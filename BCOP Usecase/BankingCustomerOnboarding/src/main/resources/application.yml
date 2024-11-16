@@ -1,9 +1,13 @@
 spring.h2.console.enabled: true
+project:
+  upload-files: uploadFiles
+
+
 spring.mail:
   host: smtp.gmail.com
   port: 587
   username: balamanchari@gmail.com
-  password: ezjfwijuerxmlvio
+  password: fbfo edmj gugw zcfv
   properties.mail.smtp:
     auth: true
     starttls.enable: true

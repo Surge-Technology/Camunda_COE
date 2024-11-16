@@ -9,7 +9,7 @@ import javax.persistence.Id;
 public class PersonalDetails {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	
 	private int personalId;
 	private String firstName;
 	private String lastName;
@@ -20,6 +20,15 @@ public class PersonalDetails {
 	private String accountType;
 	private int annualIncome;
 	private int creditScore;
+	private String uploadURL;
+
+	public String getUploadURL() {
+		return uploadURL;
+	}
+
+	public void setUploadURL(String uploadURL) {
+		this.uploadURL = uploadURL;
+	}
 
 	public int getPersonalId() {
 		return personalId;

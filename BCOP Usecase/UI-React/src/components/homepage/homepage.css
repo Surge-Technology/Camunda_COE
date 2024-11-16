@@ -1,0 +1,60 @@
+footer {
+  background: rgba(0, 0, 0, 0.815);
+  overflow-x: hidden;
+  padding: 2vmin;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+footer p > span {
+  color: #ff512f;
+  font-size: 13px;
+}
+
+.pad {
+  padding: 0% 4%;
+}
+/* It is Adjacent sibling combinator */
+
+footer .column i + i {
+  padding: 0 0.5em;
+}
+
+.homepageaction {
+  top: 45vh;
+  position: absolute;
+  width: 100%;
+}
+
+.jumbotron {
+  background-color: #daffd2;
+}
+
+.container-fluid {
+  padding: 0px;
+  /* position: relative; */
+
+  /* height: 100vh; */
+}
+
+.back {
+  padding: 0px;
+  position: relative;
+
+  height: 100vh;
+}
+
+.back::after {
+  content: "";
+  position: fixed;
+  /* background-image: url("../../assets/images/body-bg.jpg"); */
+  /* background-image: url("../../assets/images/girl-with-laptop-light.png"); */
+  background-size: cover;
+  opacity: 0.6;
+  top: 0vh;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}

@@ -1,24 +1,36 @@
 package com.camundaSaas.BankingCustomerOnboarding.controller;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,12 +48,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.css.Counter;
 
+import com.camundaSaas.BankingCustomerOnboarding.model.AddressModel;
 import com.camundaSaas.BankingCustomerOnboarding.model.CustomerDetailsModel;
 import com.camundaSaas.BankingCustomerOnboarding.model.EmialValidationModel;
+import com.camundaSaas.BankingCustomerOnboarding.model.PersonalDetails;
+import com.camundaSaas.BankingCustomerOnboarding.repo.AddressRepo;
 import com.camundaSaas.BankingCustomerOnboarding.repo.BankingRepo;
+import com.camundaSaas.BankingCustomerOnboarding.repo.PersonalRepo;
 import com.camundaSaas.BankingCustomerOnboarding.service.BankingService;
 import com.camundaSaas.BankingCustomerOnboarding.util.BankingCustomerUtilities;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,6 +68,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 
 import io.camunda.tasklist.CamundaTaskListClient;
 import io.camunda.tasklist.auth.SaasAuthentication;
@@ -79,18 +99,29 @@ public class BankingController {
 
 	@Autowired
 	BankingRepo bankingRepo;
+	
+	private static final AtomicInteger counter = new AtomicInteger(1);
+	
+	@Autowired
+	AddressRepo addressRep;
 
 	@Autowired
 	CustomerDetailsModel customerDetailsModel;
 
 	@Autowired
 	EmialValidationModel emialValidationModel;
+	
+	@Autowired
+	PersonalRepo person;
 
 	@Autowired
 	BankingCustomerUtilities bankingCustomerUtilities;
 
 	@Value("${camunda-usertask-timeout-param}")
 	private Long timeout;
+	
+	@Value("${project.upload-files:/default/path}")
+	private String uploadFiles;
 
 	@Value("${camunda-env}")
 	private String environment;
@@ -101,6 +132,7 @@ public class BankingController {
 
 	//////////////////// Start api ////////////////////////
 	@CrossOrigin
+	
 	@RequestMapping(value = "/startWorkflow", method = RequestMethod.POST, headers = "Accept=*/*", produces = "application/json", consumes = "application/json")
 	public long startWorkflow(@RequestBody EmialValidationModel customerDetails) throws TaskListException {
 
@@ -125,7 +157,7 @@ public class BankingController {
 
 		try {
 			Object obj = parser.parse(new FileReader(
-					"D:\\Workspace\\cop bank\\FinalBcop\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json"));
+					"D:\\demospace\\Camunda Coe Completed Use Case\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json"));
 			JSONObject jsonObject = (JSONObject) obj;
 
 			Map mp = (Map) jsonObject;
@@ -149,14 +181,15 @@ public class BankingController {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-
+			// Handle the IOException if the file path is incorrect or the file cannot be
+			// read
 			JSONObject errorResponse = new JSONObject();
 			errorResponse.put("error", "Failed to read the OTP file");
 
 			return errorResponse;
 		} catch (Exception e) {
 			e.printStackTrace();
-
+			// Handle any other exception that may occur during parsing or processing
 			JSONObject errorResponse = new JSONObject();
 			errorResponse.put("error", "An unexpected error occurred");
 
@@ -165,6 +198,7 @@ public class BankingController {
 	}
 
 	/// original get otp///
+	@CrossOrigin
 	@GetMapping("/enterOTP/{enterOtp}/{processInstanceKey}")
 	public JSONObject getNextActivieTask(@PathVariable String enterOtp, @PathVariable Long processInstanceKey) {
 
@@ -174,7 +208,7 @@ public class BankingController {
 		bankingCustomerUtilities = new BankingCustomerUtilities();
 		try {
 			Object obj = parser.parse(new FileReader(
-					"D:\\Workspace\\cop bank\\FinalBcop\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json"));
+					"D:\\demospace\\Camunda Coe Completed Use Case\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json"));
 			JSONObject jsonObject = (JSONObject) obj;
 
 			Map mp = (Map) jsonObject;
@@ -204,14 +238,15 @@ public class BankingController {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-
+			// Handle the IOException if the file path is incorrect or the file cannot be
+			// read
 			JSONObject errorResponse = new JSONObject();
 			errorResponse.put("error", "Failed to read the OTP file");
 
 			return errorResponse;
 		} catch (Exception e) {
 			e.printStackTrace();
-
+			// Handle any other exception that may occur during parsing or processing
 			JSONObject errorResponse = new JSONObject();
 			errorResponse.put("error", "An unexpected error occurred");
 
@@ -510,6 +545,16 @@ public class BankingController {
 
 /////////////////// Email validation ///////////////////////////////
 
+//	 @PostMapping("/login")
+//	    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
+//		 
+//	        boolean isValidUser = bankingService.isUserValid(email, password);
+//	        if (isValidUser) {
+//	            return ResponseEntity.ok("Login successful!");
+//	        } else {
+//	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
+//	        }
+//	    }
 	@CrossOrigin
 	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
@@ -542,6 +587,7 @@ public class BankingController {
 	@PostMapping("/completeUserTask/{processInstanceKey}")
 	public JSONObject getNextAct(@RequestBody Map variableMap, @PathVariable Long processInstanceKey)
 			throws TaskListException, InterruptedException, JsonMappingException, JsonProcessingException {
+		 JSONObject jsonResponse = new JSONObject();
 
 		String taskId = (String) variableMap.get("activeTaskId");
 		String taskName = "";
@@ -558,21 +604,73 @@ public class BankingController {
 
 		bankingCustomerUtilities = new BankingCustomerUtilities();
 
-		ProcessInstanceResult workflowInstanceResult = ((CreateProcessInstanceCommandStep3) zeebeClient
-				.newCreateInstanceCommand().bpmnProcessId(bpmnProcessId).latestVersion().variables(variableMap)
-				.requestTimeout(Duration.ofMillis(timeout))).withResult().send().join();
+//		ProcessInstanceResult workflowInstanceResult = ((CreateProcessInstanceCommandStep3) zeebeClient
+//				.newCreateInstanceCommand().bpmnProcessId(bpmnProcessId).latestVersion().variables(variableMap)
+//				.requestTimeout(Duration.ofMillis(timeout))).withResult().send().join();
 
-		Map wfIR = workflowInstanceResult.getVariablesAsMap();
+//		Map wfIR = workflowInstanceResult.getVariablesAsMap();
+		int uniqueId = counter.getAndIncrement();
+		if (bpmnProcessId.equalsIgnoreCase("Personal_Details")) {
 
-		if (wfIR.containsKey("creditScore")) {
-			creditScore = (int) workflowInstanceResult.getVariablesAsMap().get("creditScore");
+		    // Remove bpmnProcessId before converting the map to the model
+		    variableMap.remove("bpmnProcessId");
 
-			variableMap.put("creditScore", creditScore);
+		    variableMap.put("creditScore", creditScore);
 
+		    int annualIncome = (int) variableMap.get("annualIncome");
+		    int age = (int) variableMap.get("age");
+
+		    ObjectMapper mp = new ObjectMapper();
+
+		    int baseScore = 300;
+		    int ageFactor = 10;
+
+		    int ageScore = age * ageFactor;
+		    double incomeScore = annualIncome / 1000.0;
+
+		    int credit = baseScore + ageScore + (int) incomeScore;
+
+		    // Update the map with calculated credit score
+		    variableMap.put("age", age);
+		    variableMap.put("annualIncome", annualIncome);
+		    variableMap.put("creditScore", credit);
+
+		    // Convert the map to the model after removing unnecessary fields
+		    CustomerDetailsModel personalInput = mp.convertValue(variableMap, CustomerDetailsModel.class);
+
+		    System.out.println("variableMap ===" + personalInput.getCreditScore());
+		   
+		    jsonResponse.put("creditScore", credit);
+		    
+
+			 
+			
+			PersonalDetails personalObj=new PersonalDetails();
+			personalObj.setPersonalId(uniqueId);
+			personalObj.setAccountType((String)variableMap.get("accountType"));
+			personalObj.setAge((int)variableMap.get("age"));
+			personalObj.setAnnualIncome((int)variableMap.get("annualIncome"));
+			personalObj.setDob((String)variableMap.get(("dob")));
+			personalObj.setAge((int)variableMap.get("age"));
+			
+			
+			person.save(personalObj);
+		    
 		}
-
-		variableMap.put("wfIR", wfIR);
-
+		
+		
+		
+		System.out.println("--"+variableMap.get("address"));
+		
+		String address= (String)variableMap.get("address");
+		
+		AddressModel obj=new  AddressModel();
+		
+		obj.setAddress(address);
+		
+		addressRep.save(obj);
+		
+		jsonResponse.put("id", uniqueId);
 		System.out.println("user entered");
 		String taskIdMod = bankingCustomerUtilities.getActiveTaskIdForTaskName("", taskName);
 
@@ -582,14 +680,26 @@ public class BankingController {
 		} catch (Exception ex) {
 			System.out.println("task id not found..." + taskIdMod);
 		}
+		return jsonResponse ;
+		
+		
 
-		// String url = "http://localhost:8080/getNextActiveTaskDifference/" +
-		// processInstanceKey;
+	}
+		
 
-		// Map taskListFormMap = bankingCustomerUtilities.getNextTaskForm(url);
+//		variableMap.put("wfIR", wfIR);
 
-		JSONObject jsonResponse = new JSONObject();
-		jsonResponse.put("creditScore", creditScore);
+
+//
+//		// String url = "http://localhost:8080/getNextActiveTaskDifference/" +
+//		// processInstanceKey;
+//
+//		// Map taskListFormMap = bankingCustomerUtilities.getNextTaskForm(url);
+//
+//		JSONObject jsonResponse = new JSONObject();
+//		
+//		jsonResponse.put("creditScore", creditScore);
+//		System.out.println("***********creditScore"+creditScore);
 
 //		if (null != taskListFormMap && taskListFormMap.size() > 0) {
 //
@@ -605,9 +715,8 @@ public class BankingController {
 //
 //		}
 
-		return jsonResponse;
-
-	}
+	
+	
 
 	/////////////////////////// Assigine task //////////////////////////
 
@@ -699,6 +808,8 @@ public class BankingController {
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		Map<String, Object> consolidatedVariables = new HashMap<>();
+		
+		
 
 		try {
 
@@ -718,6 +829,34 @@ public class BankingController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
+		
+		 String imagePath = "D:\\demospace\\Camunda Coe Completed Use Case\\BankingCustomerOnboarding\\uploadFiles\\cca801e3-a737-489c-86ea-47b2417a5b5c.docx";
+		    
+		    // Read the image file into a byte array
+		    try {
+		        byte[] imageBytes;
+		        try (InputStream inputStream = new FileInputStream(imagePath)) {
+		            imageBytes = new byte[(int) new File(imagePath).length()];
+		            inputStream.read(imageBytes);
+		        }
+
+		        // Convert to Base64 for safe transmission
+		        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+
+		        // Add the image and filename to consolidatedVariables
+		        consolidatedVariables.put("image", base64Image);
+		        consolidatedVariables.put("imageFileName", imagePath);
+
+		    } catch (IOException e) {
+		        e.printStackTrace();
+		        consolidatedVariables.put("error", "Failed to read the image file");
+		    }
+
+		
+		
+		
 		return consolidatedVariables;
 
 	}
@@ -810,9 +949,7 @@ public class BankingController {
 
 	@CrossOrigin
 	@PostMapping("/completeTasklocal/{taskId}")
-	// @RequestMapping(value = "/completeTasklocal/{taskId}", method =
-	// RequestMethod.POST, headers = "Accept=*/*", produces = "application/json",
-	// consumes = "application/json")
+	//@RequestMapping(value = "/completeTasklocal/{taskId}", method = RequestMethod.POST, headers = "Accept=*/*", produces = "application/json", consumes = "application/json")
 	public String claimTask(@PathVariable String taskId, @RequestBody Map map) throws TaskListException {
 
 		System.out.println("Task Id.....: " + taskId);
@@ -842,5 +979,77 @@ public class BankingController {
 
 		return "ok";
 	}
+	
+	//--download 
+	
+	@CrossOrigin
+	@GetMapping("/downloadImage")
+	public ResponseEntity<byte[]> downloadImage() {
+	    String imagePath = "D:\\demospace\\Camunda Coe Completed Use Case\\BankingCustomerOnboarding\\uploadFiles\\cca801e3-a737-489c-86ea-47b2417a5b5c.docx"; // Your static file path
+	    System.out.println("download");
+	    try {
+	        File imageFile = new File(imagePath);
+	        byte[] imageBytes = new byte[(int) imageFile.length()];
+
+	        try (InputStream inputStream = new FileInputStream(imageFile)) {
+	            int bytesRead = inputStream.read(imageBytes);
+	            if (bytesRead == -1) {
+	                throw new IOException("Could not read file: " + imageFile.getAbsolutePath());
+	            }
+	        }
+
+	        // Set the response headers to indicate a file download
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	            .filename(imageFile.getName())
+	            .build());
+System.out.println("enter");
+	        return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
+
+	
+	
+	
+	
+	//--upload 
+	@CrossOrigin
+	@PostMapping("/files/fileimage/upload")
+    public ResponseEntity<String> uploadFiles(@RequestPart("image") MultipartFile image) throws IOException {
+        System.out.println("Upload initiated");
+
+        // Get the original file name
+        String originalFileName = image.getOriginalFilename();
+        String fileExtension = originalFileName != null ? originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+        String randomID = UUID.randomUUID().toString();
+        String fileName = randomID + fileExtension;
+
+        // Ensure the upload directory exists
+        File uploadDir = new File(uploadFiles);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        // Construct the full file path
+        Path filePath = Paths.get(uploadFiles, fileName);
+        System.out.println("Saving file to: " + filePath.toString());
+
+        // Save the file manually
+        try (InputStream inputStream = image.getInputStream();
+             FileOutputStream outputStream = new FileOutputStream(filePath.toFile())) {
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        }
+
+        return ResponseEntity.ok("File uploaded successfully. File name: " + fileName);
+    }
 
 }

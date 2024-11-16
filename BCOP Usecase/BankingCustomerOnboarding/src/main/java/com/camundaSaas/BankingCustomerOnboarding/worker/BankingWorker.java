@@ -14,15 +14,21 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.camundaSaas.BankingCustomerOnboarding.model.AddressModel;
 import com.camundaSaas.BankingCustomerOnboarding.model.CustomerDetailsModel;
@@ -66,6 +72,9 @@ public class BankingWorker {
 
 	@Autowired
 	PersonalRepo personalRepo;
+	
+	
+
 
 	final RestTemplate rest = new RestTemplate();
 
@@ -74,9 +83,26 @@ public class BankingWorker {
 	@ZeebeWorker(name = "Sending Otp to email", type = "sendingOtptoEmail")
 	public void sendingEmailVerification(final JobClient client, final ActivatedJob job) throws IOException {
 
+//System.out.println("worker enter");
 		Map variableMap = job.getVariablesAsMap();
-
+		
 		Long pId = job.getProcessInstanceKey();
+//
+////OTP Generation
+//
+//String strOTP = "0123456789";
+//int n = strOTP.length();
+//
+//String OTP = "";
+//int len = 6;
+//
+//Map OTPmap = new HashMap<>();
+//
+//for (int i = 1; i <= len; i++) {
+//
+//OTP += (strOTP.charAt((int) ((Math.random() * 10) % n)));
+//OTPmap.put("OTP", OTP);
+//}
 
 		String OTPVALUES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -105,14 +131,18 @@ public class BankingWorker {
 
 		System.out.println(password);
 
-		ObjectMapper mapper = new ObjectMapper();
-		File file = new File(
-				"D:\\Workspace\\cop bank\\FinalBcop\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json");
+//Fitch OTP to Json file 
 
+		ObjectMapper mapper = new ObjectMapper();
+		File file = new File("D:\\demospace\\Camunda Coe Completed Use Case\\BankingCustomerOnboarding\\src\\jsonFile\\OTPfile.json");
+
+// Create the file if it doesn't exist
 		if (!file.exists()) {
 			file.createNewFile();
 		}
+// Read the existing data from the file into a list
 		Map productList = new HashMap<>();
+// List productList = new ArrayList<>();
 		try {
 			FileInputStream fileInputStream = new FileInputStream(file);
 			TypeReference<Map> typeReference = new TypeReference<Map>() {
@@ -131,6 +161,8 @@ public class BankingWorker {
 			e.printStackTrace();
 		}
 
+// String str1 = "Hi" + password.toString();
+
 		String sender = "balamanchari@gmail.com";
 		String receiver = "camerongre1@gmail.com";
 
@@ -139,15 +171,19 @@ public class BankingWorker {
 		mailMessage.setFrom(sender);
 		mailMessage.setTo(receiver);
 		mailMessage.setSubject(subject);
-
+		
 		System.out.println("otp : " + str);
 		mailMessage.setText("OTP is " + str);
 
 		System.out.println(mailMessage);
 		javaMailSender.send(mailMessage);
 
+// variableMap.put("sendEmail", mailMessage);
+
 		client.newCompleteCommand(job.getKey()).variables(variableMap).send().join();
 		System.out.println("sendingEmailVerification id Completed");
+//System.out.println("sendingEmailVerification Worker Enter :--------->");
+//zeebeclient.newCompleteCommand(job.getKey()).variables("").send().join();
 
 	}
 
@@ -159,22 +195,26 @@ public class BankingWorker {
 
 		Map<String, Object> variableMap = job.getVariablesAsMap();
 
-		System.out.println(" variableMap -" + variableMap);
+		System.out.println(" variableMap -"+ variableMap);
 		String addressFromUser = (String) variableMap.get("address");
 
 		String status = "approved";
 		variableMap.put("status", status);
 
 		System.out.println("variable Map == " + variableMap);
-		String key = "7NQ8LYVK4C9FTJ3H6WMG";
+		String key = "EJY3GRLV4DCMP97UHFNW";
 		String format = "json";
-		String secret = "6EYGMU3Q94RVXTKAFPC7";
+		String secret = "LFKMG4A6VN9TRXJCEYPH";
 		String address = (String) variableMap.get("address");
 
 		Map mpm = (Map) variableMap.get("input");
 
+		System.out.println("mapvalue      ==" + mpm);
 		ObjectMapper mp = new ObjectMapper();
 		CustomerDetailsModel convert = mp.convertValue(mpm, CustomerDetailsModel.class);
+		// CustomerDetailsModel modelObj=(CustomerDetailsModel)variableMap.get("input");
+
+		System.out.println(convert);
 
 		Object addresss = variableMap.get("address");
 
@@ -190,9 +230,13 @@ public class BankingWorker {
 
 		HttpURLConnection connection = (HttpURLConnection) url1.openConnection();
 
+		// Map result = rest.getForObject(url, Map.class);
+
 		connection.setRequestMethod("GET");
 
 		int responseCode = connection.getResponseCode();
+
+		// Read the response
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
@@ -205,6 +249,8 @@ public class BankingWorker {
 		}
 
 		reader.close();
+
+		// return response;
 
 		String jsonString = response.toString();
 
@@ -223,7 +269,24 @@ public class BankingWorker {
 
 		}
 
+//		
+//		Object addresss= variableMap.get("AddressVerfication");
+//		
+//		Map mp = (Map) addresss;
+//		
+//		 String matched=(String)mp.get("matched");
+
+		// System.out.println(matched);
 		client.newCompleteCommand(job.getKey()).variables(variableMap).send().join();
+
+////////////////////////////////////////////////////////////
+
+//		addressModel.setAddress(address);
+//		bankingService.saveAddress(addressModel);
+
+		// bankingService.saveCustomerDetails(convert);
+
+		// return "address verified";
 
 	}
 
@@ -233,7 +296,10 @@ public class BankingWorker {
 	public void generateCreditScore(final JobClient client, final ActivatedJob job) {
 		System.out.println("generate credit score worker entered");
 
-		Map<String, Object> getVariable = job.getVariablesAsMap();
+		Map<String,Object> getVariable = job.getVariablesAsMap();
+
+		System.out.println("get variable map = " + getVariable);
+
 		String firstName = (String) getVariable.get("firstName");
 		String lastName = (String) getVariable.get("lastName");
 		int age = (int) getVariable.get("age");
@@ -247,11 +313,15 @@ public class BankingWorker {
 
 		int baseScore = 300;
 		int ageFactor = 10;
+		// double incomeFactore = 0.01;
+
 		int ageScore = age * ageFactor;
 		double incomeScore = annualIncome / 1000;
+
 		int creditScore = baseScore + ageScore + (int) incomeScore;
 
 		Map variableMap = new HashMap();
+
 		variableMap.put("firstName", firstName);
 		variableMap.put("lastName", lastName);
 		variableMap.put("age", age);
@@ -261,12 +331,14 @@ public class BankingWorker {
 		variableMap.put("annualIncome", annualIncome);
 		variableMap.put("accountType", accountType);
 		variableMap.put("creditScore", creditScore);
-		// getVariable.put("creditScore", creditScore);
+		//getVariable.put("creditScore", creditScore);
 		CustomerDetailsModel personalInput = mp.convertValue(variableMap, CustomerDetailsModel.class);
 
 		System.out.println("variableMap ===" + personalInput);
 
 		client.newCompleteCommand(job.getKey()).variables(variableMap).send().join();
+
+		/////////////////////////////////////
 
 		bankingService.saveCustomerDetails(personalInput);
 
@@ -280,31 +352,37 @@ public class BankingWorker {
 	public void DeliverConfirmationWorker(final JobClient client, final ActivatedJob job) {
 		System.out.println("DeliverConfirmation worker entered");
 
+		
+
 		client.newCompleteCommand(job.getKey()).variables("").send().join();
 
 	}
-
+	
+	
 ///////////////////////  DeliverConfirmation worker ///////////////////////
 
-	@ZeebeWorker(name = "Send Confirmation on Application Acceptance", type = "Send Confirmation")
-	public void SendConfirmation(final JobClient client, final ActivatedJob job) {
-		System.out.println("Send Confirmation on Application Acceptance worker entered");
+@ZeebeWorker(name = "Send Confirmation on Application Acceptance", type = "Send Confirmation")
+public void SendConfirmation(final JobClient client, final ActivatedJob job) {
+System.out.println("Send Confirmation on Application Acceptance worker entered");
 
-		String str = "Hello, Cameron Green\n\n We are delighted to inform you that your bank account has been successfully created with our bank. Welcome to our banking family!";
+String str = "  We are delighted to inform you that your bank account has been successfully created with our bank.";
+System.out.println("Reject Application worker entered");
 		String sender = "balamanchari@gmail.com";
 		String receiver = "camerongre1@gmail.com";
-		String subject = "Welcome to Our Bank";
+		String subject = "Confirmation Mail";
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setFrom(sender);
 		mailMessage.setTo(receiver);
 		mailMessage.setSubject(subject);
+
 		mailMessage.setText(str);
+
 		System.out.println(mailMessage);
 		javaMailSender.send(mailMessage);
 
-		client.newCompleteCommand(job.getKey()).variables("").send().join();
+client.newCompleteCommand(job.getKey()).variables("").send().join();
 
-	}
+}
 
 //////////////////////Required Document worker ////////////////////
 
@@ -316,49 +394,66 @@ public class BankingWorker {
 		Map getVariableMap = job.getVariablesAsMap();
 		Long pId = job.getProcessInstanceKey();
 
-		String str = "Hello, Here is your link: <a href='http://localhost:3000/CustomerQueryPage?pId=" + pId
-				+ "'>Click here</a>";
+		String str = "Hello, Here is your link: <a href='http://localhost:3000/CustomerQueryPage?pId="+pId+"'>Click here</a>";
+		//String str = "Hello, Here is your link: <a href='http://localhost:3000/CustomerQueryPage'>Click here</a>";
+
 		String sender = "balamanchari@gmail.com";
 		String receiver = "camerongre1@gmail.com";
-		String subject = "Email Verification Confirmation";
+		String subject = "Document need";
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setFrom(sender);
 		mailMessage.setTo(receiver);
 		mailMessage.setSubject(subject);
+
 		mailMessage.setText(str);
+
 		System.out.println(mailMessage);
 		javaMailSender.send(mailMessage);
 
 		client.newCompleteCommand(job.getKey()).variables(getVariableMap).send().join();
 
 	}
+	
+	
 
 	@ZeebeWorker(name = "Add Rejected Application to CRM", type = "addRejectedApplication to CRM")
 	public void rejectApplication(final JobClient client, final ActivatedJob job) {
 
-		System.out.println("Reject Application worker entered");
 
 		client.newCompleteCommand(job.getKey()).variables("").send().join();
 	}
+	@ZeebeWorker(name = "Send Notification on Application Rejection", type = "Send Re-Engagement Invitations")
+	public void reEngagement(final JobClient client, final ActivatedJob job) {
 
+		System.out.println("Send rejection worker entered");
+
+		client.newCompleteCommand(job.getKey()).variables("").send().join();
+	}
 	@ZeebeWorker(name = "Send Notification on Application Rejection", type = "Send rejection")
 	public void sendRejection(final JobClient client, final ActivatedJob job) {
 
 		System.out.println("Send rejection worker entered");
+		String str = " Your application did not meet our internal criteria for account eligibility.Please note that this decision has been made after a thorough analyses, and we are unable to proceed with opening the account at this time.we cannot more forward";
 
-		String str = "Hello, Cameron Green\n\nWe regret to inform you that your application has been reviewed, and we are unable to proceed with it at this time. We appreciate your interest and the effort you put into your application.";
-		String sender = "balamanchari@gmail.com";
-		String receiver = "camerongre1@gmail.com";
-		String subject = "Application Status: Regrettably, Your Application Has Not Been Approved";
-		SimpleMailMessage mailMessage = new SimpleMailMessage();
-		mailMessage.setFrom(sender);
-		mailMessage.setTo(receiver);
-		mailMessage.setSubject(subject);
-		mailMessage.setText(str);
-		System.out.println(mailMessage);
-		javaMailSender.send(mailMessage);
+		System.out.println("Reject Application worker entered");
+				String sender = "balamanchari@gmail.com";
+				String receiver = "camerongre1@gmail.com";
+				String subject = "Application Status: Regrettably, Your Application Has Not Been Approved";
+				SimpleMailMessage mailMessage = new SimpleMailMessage();
+				mailMessage.setFrom(sender);
+				mailMessage.setTo(receiver);
+				mailMessage.setSubject(subject);
 
+				mailMessage.setText(str);
+
+				System.out.println(mailMessage);
+				javaMailSender.send(mailMessage);
 		client.newCompleteCommand(job.getKey()).variables("").send().join();
 	}
+	
+	//----upload image ----//
+	
+
+	
 
 }

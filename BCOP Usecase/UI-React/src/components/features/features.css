@@ -1,0 +1,122 @@
+.options {
+  border-radius: 30px 30px 30px 30px;
+  width: 150px;
+  height: 150px;
+  transition: transform 300ms;
+  box-shadow: 2px 6px 8px rgb(0, 0, 0);
+}
+
+.options:hover {
+  transform: scale(1.1);
+}
+
+.featurebg {
+  background-image: url("../../assets/images//feature-background.jpg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  border-radius: 10px 80px 30px;
+  box-shadow: 4px 8px 12px rgb(0, 0, 0);
+  position: absolute;
+  top: 13%;
+  left: 13%;
+}
+
+th {
+  text-align: center;
+}
+
+td {
+  text-align: center;
+}
+
+.test {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+.test::after {
+  background-image: url("../../assets/images/forest.jpg");
+  background-size: cover;
+  content: "";
+  position: absolute;
+  filter: blur(2px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+}
+
+#toptext {
+  color: white;
+  padding: 0px;
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.content {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.featurebtn-lg {
+  width: 80vh;
+}
+
+.featurebutton {
+  border-radius: 40px;
+  /*background-color: #f4511e;*/
+  border: none;
+  box-shadow: 8px 15px 25px black;
+  color: #ffffff;
+  text-align: center;
+  font-size: 28px;
+  padding: 20px;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+  animation: mymove 6s infinite;
+}
+
+.featurebutton span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.featurebutton span:after {
+  /* content: '\00bb';*/
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.featurebutton:hover span {
+  padding-right: 30px;
+}
+
+.featurebutton:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+
+.featuretitle {
+  color: white;
+}
+
+@keyframes mymove {
+  50% {
+    background-color: rgb(14, 190, 67);
+  }
+  50% {
+    background-color: rgb(56, 102, 230);
+  }
+}

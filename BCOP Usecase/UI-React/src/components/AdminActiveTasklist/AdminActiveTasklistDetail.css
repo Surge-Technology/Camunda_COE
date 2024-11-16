@@ -1,0 +1,55 @@
+.ActiveTaskForm {
+  /* background-color: #e6e5e5; */
+
+  height: 100vh;
+
+  background-image: url("../../assets/images/header-background.jpg");
+
+  background-repeat: no-repeat;
+
+  background-size: 130%;
+
+  box-shadow: 5px 8px 7px rgb(0, 0, 0);
+}
+
+.page-content{
+  height: 50px;
+  font-size: 20px;
+}
+.table {
+  height:35vh;
+}
+.thead-dark{
+  height :80px;
+}
+
+.form-group row{
+  font-weight: bold;
+  font-size: 26px;
+}
+.form-row>.col, .form-row>[class*=col-] {
+  padding-right: 31px;
+  padding-left: 48px;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: 16px;
+  margin-left: 27px;
+}
+
+.text-primary {
+  color: #0CDA90 !important;
+}
+.btn-primary {
+  color: #fff;
+  background-color: #0CDA90;
+  border-color: #0CDA90;
+}
+.btn-primary {
+  box-shadow: 0 3px 2px rgb(12 218 144 / 20%);
+}
+
+.background-color{
+  background-color: #0CDA90;
+}

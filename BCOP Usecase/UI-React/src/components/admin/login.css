@@ -1,0 +1,50 @@
+.divider-text {
+  position: relative;
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.divider-text span {
+  padding: 7px;
+  font-size: 12px;
+  position: relative;
+  z-index: 2;
+}
+.divider-text:after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+  top: 55%;
+  left: 0;
+  z-index: 1;
+}
+
+.iconsize {
+  font-size: 16px;
+}
+
+/* 
+.bg{
+    background-image: url("../../assets/feature-background.jpg");
+    background-repeat: no-repeat;
+
+    background-size:cover;
+} */
+
+input {
+  opacity: 0.8;
+}
+select {
+  opacity: 0.8;
+}
+
+#animate {
+  animation: mymove 6s infinite;
+}
+
+@keyframes mymove {
+  50% {
+    box-shadow: 10px 20px 30px gray;
+  }
+}

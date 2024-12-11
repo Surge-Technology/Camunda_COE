@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="creditScoreEvaluation" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.13.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0" camunda:diagramRelationId="2d644657-ba8b-4506-abea-5aad091feec2">
+  <decision id="Decision_0tqws81" name="Decision 1">
+    <decisionTable id="DecisionTable_0ep5ibm" hitPolicy="FIRST">
+      <input id="Input_1" label="creditScore">
+        <inputExpression id="InputExpression_1" typeRef="number">
+          <text>creditScore</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="risk" name="risk" typeRef="string" />
+      <rule id="DecisionRule_1uxfkgb">
+        <inputEntry id="UnaryTests_0murgpj">
+          <text>&gt; 700</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_03g3v8v">
+          <text>"low"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_1k50yk8">
+        <inputEntry id="UnaryTests_1bfygk0">
+          <text>[500 .. 700]</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0afmjos">
+          <text>"medium"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_0842ih0">
+        <inputEntry id="UnaryTests_1yut59a">
+          <text>&lt; 500</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1kvgx5i">
+          <text>"high"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram>
+      <dmndi:DMNShape dmnElementRef="Decision_0tqws81">
+        <dc:Bounds height="80" width="180" x="160" y="100" />
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
